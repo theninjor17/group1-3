@@ -41,19 +41,12 @@ int main(int argc, char* argv[])
 	char ar{}; //audio recive menu
 	char COMValue[5];
 	int recordingtime = RECORD_TIME * SAMPLES_SEC * 2;
-	static HANDLE hComTx;
 	FILE* f;
 	FILE* COMFile;
 	char userBuffer[140];
 	srand(time(0));
 	int randomVal;
 	randomVal = rand() % 1140;
-	wchar_t COMPORT_Tx[] = L"COM3";									// COM port used for Rx
-	static HANDLE hComTx;										// Pointer to the selected COM port (Receiver)
-	int nComRate = 9600;										// Baud (Bit) rate in bits/second 
-	int nComBits = 8;
-	static COMMTIMEOUTS timeout;
-
 	while (mainmenu != 'q')
 	{
 		system("cls");
@@ -128,19 +121,7 @@ int main(int argc, char* argv[])
 
 								if ((save == 'y') || (save == 'Y')) {
 									
-									initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
-									printf("COM Port: %ws has been initialized", COMPORT_Tx);
-									Sleep(1000);
-									system("cls");
-									printf("\n _________________________");
-									printf("\n|                         |");
-									printf("\n|   Sending to user...... |");
-									printf("\n|_________________________|");
-									outputToPort(&hComTx, iBigBuf, recordingtime);
-									Sleep(1000);
-									
-									purgePort(&hComTx);											// Purge the Tx port
-									CloseHandle(hComTx);										// Close the handle to Tx port 
+									Audio(iBigBuf, recordingtime);
 									break;
 								}
 

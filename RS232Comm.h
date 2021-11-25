@@ -6,6 +6,7 @@
 
 // MG Added test
 void TxRx(void); 
+void Audio(short iBigBuf[], int recordingtime);
 
 
 // Prototype the functions to be used

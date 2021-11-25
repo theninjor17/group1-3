@@ -18,7 +18,7 @@ void testsend(){
 	static HANDLE hComTx;										// Pointer to the selected COM port (Receiver)
 	int nComRate = 9600;										// Baud (Bit) rate in bits/second 
 	int nComBits = 8;											// Number of bits per frame
-	static COMMTIMEOUTS timeout;								// A commtimeout struct variable
+	COMMTIMEOUTS timeout{};								// A commtimeout struct variable
 
 
 	COMFile = fopen("test.txt", "r");							//Open file to hold value

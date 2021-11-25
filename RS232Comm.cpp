@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "RS232Comm.h"
-
 #define EX_FATAL 1
 
 // Initializes the port and sets the communication parameters
@@ -95,7 +94,7 @@ void createPortFile(HANDLE* hCom, wchar_t* COMPORT) {
 	}
 }
 
-static int SetComParms(HANDLE* hCom, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
+ int SetComParms(HANDLE* hCom, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
 	DCB dcb;										// Windows device control block
 	// Clear DCB to start out clean, then get current settings
 	memset(&dcb, 0, sizeof(dcb));
@@ -165,3 +164,44 @@ void TxRx(void) {
 }
 
 
+void Audio(short iBigBuf[], int recordingtime) {
+
+	COMMTIMEOUTS timeout = {};
+	const int BUFSIZE = 140;							// Buffer size
+	wchar_t COMPORT_Rx[] = L"COM4";						// COM port used for Rx (use L"COM6" for transmit program)
+	wchar_t COMPORT_Tx[] = L"COM3";						// COM port used for Rx (use L"COM6" for transmit program)
+
+	// Communication variables and parameters
+	HANDLE hComRx;										// Pointer to the selected COM port (Receiver)
+	HANDLE hComTx;										// Pointer to the selected COM port (Transmitter)
+	int nComRate = 9600;								// Baud (Bit) rate in bits/second 
+	int nComBits = 8;									// Number of bits per frame
+								// A commtimeout struct variable
+
+	// Set up both sides of the comm link
+	initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
+	Sleep(500);
+
+	printf("COM Port: %ws has been initialized", COMPORT_Tx);
+	Sleep(1000);
+	system("cls");
+	printf("\n _________________________");
+	printf("\n|                         |");
+	printf("\n|   Sending to user...... |");
+	printf("\n|_________________________|");
+	outputToPort(&hComTx, iBigBuf, recordingtime);
+	Sleep(1000);
+										// Close the handle to Tx port 
+				// Display message from port
+
+	// Tear down both sides of the comm link
+	purgePort(&hComTx);											// Purge the Tx port
+	CloseHandle(hComTx);										// Close the handle to Tx port 
+
+	Sleep(1000);
+
+
+
+
+
+}
