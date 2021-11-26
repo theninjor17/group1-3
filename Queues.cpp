@@ -46,3 +46,43 @@ link DeQueue(void){
         return(pTemp);              
     }
 }
+
+
+// Assignment #2 - Recursive traverse functions
+
+link returnHead() {
+    return pHead;
+}
+
+int count(link x) {
+    if (x == NULL) return 0;
+    return (1 + count(x->pNext));
+}
+
+link deleteR(link parent, link child, Item v) {
+    if (child == NULL) return(NULL);
+    if (child->Data.sid == v.sid) {
+        parent->pNext = child->pNext;
+        free(child);
+        deleteR(parent, parent->pNext, v);
+    }
+    else {
+        deleteR(child, child->pNext, v);
+    }
+}
+
+void visit(link h) {
+    printf("\nSID of node: %d\n", h->Data.sid);
+}
+
+void traverse(link h, void (*visit)(link)) {
+    if (h == NULL) return;
+    (*visit)(h);
+    traverse(h->pNext, visit);
+}
+
+void traverseR(link h, void (*visit)(link)) {
+    if (h == NULL) return;
+    traverseR(h->pNext, visit);
+    (*visit)(h);
+}

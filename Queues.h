@@ -35,4 +35,13 @@ void InitQueue(void);
 int IsQueueEmpty(void);
 void AddToQueue(link);
 link DeQueue(void);
+
+//Recursive Queue functions
+link returnHead();
+int count(link x);
+link deleteR(link parent, link child, Item v);
+void visit(link h);
+void traverse(link h, void (*visit)(link));
+void traverseR(link h, void (*visit)(link));
+
 #endif
