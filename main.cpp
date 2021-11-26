@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
 	extern short iBigBuf[];												// buffer
 	extern long  lBigBufSize;											// total number of samples
 	short* iBigBufNew = (short*)malloc(lBigBufSize * sizeof(short));		// buffer used for reading recorded sound from file
+	
 
 	char save{};
 	char replay{};
@@ -121,7 +122,7 @@ int main(int argc, char* argv[])
 
 								if ((save == 'y') || (save == 'Y')) {
 									
-									Audio(iBigBuf, recordingtime);
+									Audio();
 									break;
 								}
 

@@ -6,13 +6,15 @@
 
 // MG Added test
 void TxRx(void); 
-void Audio(short iBigBuf[], int recordingtime);
+void Audio();
+
 
 
 // Prototype the functions to be used
 void initPort(HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout);
 void purgePort(HANDLE* hCom);
 void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf);
+void outputToPort2(HANDLE* hCom, LPCVOID buf, void* message);
 DWORD inputFromPort(HANDLE* hCom, LPVOID buf, DWORD szBuf);
 
 // Sub functions

@@ -2,11 +2,13 @@
  * By: Michael A. Galle
  *
  */
+#define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>    // Includes the functions for serial communication via RS232
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "RS232Comm.h"
+#include "sound.h"
 #define EX_FATAL 1
 
 // Initializes the port and sets the communication parameters
@@ -25,15 +27,46 @@ void purgePort(HANDLE* hCom) {
 // Output/Input messages to/from ports 
 void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
 	int i=0;
+
 	DWORD NumberofBytesTransmitted;
+
 	LPDWORD lpErrors=0;
+	
 	LPCOMSTAT lpStat=0; 
+
 
 	i = WriteFile(
 		*hCom,										// Write handle pointing to COM port
 		buf,										// Buffer size
 		szBuf,										// Size of buffer
 		&NumberofBytesTransmitted,					// Written number of bytes
+		NULL
+	); 
+	printf("break for life");
+	Sleep(1000);
+	// Handle the timeout error
+	if (i == 0) {
+		printf("\nWrite Error: 0x%x\n", GetLastError());
+		ClearCommError(hCom, lpErrors, lpStat);		// Clears the device error flag to enable additional input and output operations. Retrieves information ofthe communications error.	
+	}
+	else
+		printf("\nSuccessful transmission, there were %ld bytes transmitted\n", NumberofBytesTransmitted);
+	
+	printf("break for life");
+	Sleep(1000);
+}
+
+void outputToPort2(HANDLE* hCom, LPCVOID buf, DWORD message) {
+	int i = 0;
+	DWORD BytesTransmitted;
+	LPDWORD lpErrors = 0;
+	LPCOMSTAT lpStat = 0;
+
+	i = WriteFile(
+		*hCom,										// Write handle pointing to COM port
+		buf,										// Buffer size
+		message,										// Size of buffer
+		&BytesTransmitted,					// Written number of bytes
 		NULL
 	);
 	// Handle the timeout error
@@ -42,7 +75,7 @@ void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
 		ClearCommError(hCom, lpErrors, lpStat);		// Clears the device error flag to enable additional input and output operations. Retrieves information ofthe communications error.	
 	}
 	else
-		printf("\nSuccessful transmission, there were %ld bytes transmitted\n", NumberofBytesTransmitted);
+		printf("\nSuccessful transmission, there were %ld bytes transmitted\n", BytesTransmitted);
 }
 
 DWORD inputFromPort(HANDLE* hCom, LPVOID buf, DWORD szBuf) {
@@ -112,8 +145,8 @@ void createPortFile(HANDLE* hCom, wchar_t* COMPORT) {
 
 	// Set communication timeouts (SEE COMMTIMEOUTS structure in MSDN) - want a fairly long timeout
 	memset((void *)&timeout, 0, sizeof(timeout));
-	timeout.ReadIntervalTimeout = 500;				// Maximum time allowed to elapse before arival of next byte in milliseconds. If the interval between the arrival of any two bytes exceeds this amount, the ReadFile operation is completed and buffered data is returned
-	timeout.ReadTotalTimeoutMultiplier = 1;			// The multiplier used to calculate the total time-out period for read operations in milliseconds. For each read operation this value is multiplied by the requested number of bytes to be read
+	timeout.ReadIntervalTimeout = 10000;				// Maximum time allowed to elapse before arival of next byte in milliseconds. If the interval between the arrival of any two bytes exceeds this amount, the ReadFile operation is completed and buffered data is returned
+	timeout.ReadTotalTimeoutMultiplier = 5;			// The multiplier used to calculate the total time-out period for read operations in milliseconds. For each read operation this value is multiplied by the requested number of bytes to be read
 	timeout.ReadTotalTimeoutConstant = 5000;		// A constant added to the calculation of the total time-out period. This constant is added to the resulting product of the ReadTotalTimeoutMultiplier and the number of bytes (above).
 	SetCommTimeouts(*hCom, &timeout);
 	return(1);
@@ -164,19 +197,39 @@ void TxRx(void) {
 }
 
 
-void Audio(short iBigBuf[], int recordingtime) {
-
-	COMMTIMEOUTS timeout = {};
-	const int BUFSIZE = 140;							// Buffer size
-	wchar_t COMPORT_Rx[] = L"COM4";						// COM port used for Rx (use L"COM6" for transmit program)
-	wchar_t COMPORT_Tx[] = L"COM3";						// COM port used for Rx (use L"COM6" for transmit program)
-
-	// Communication variables and parameters
-	HANDLE hComRx;										// Pointer to the selected COM port (Receiver)
+ void Audio() {
+	 char COMValue[5];											//Var to get COM value from file
+	 FILE* COMFile;
+	 // BUFFERS
+	 short iBigBuf[SAMPLES_SEC * RECORD_TIME];
+	 long  lBigBufSize = SAMPLES_SEC * RECORD_TIME;	// total number of samples
+	 short* iBigBufNew = (short*)malloc(lBigBufSize * sizeof(short));
+	COMMTIMEOUTS timeout{};
+	const int BUFSIZE = 0;							// Buffer size
+	wchar_t COMPORT_Tx[5];						// COM port used for Rx (use L"COM6" for transmit program)
+	printf("buffer%d", iBigBuf[0]);
+	// Communication variables and parameters 
 	HANDLE hComTx;										// Pointer to the selected COM port (Transmitter)
 	int nComRate = 9600;								// Baud (Bit) rate in bits/second 
 	int nComBits = 8;									// Number of bits per frame
 								// A commtimeout struct variable
+
+
+	COMFile = fopen("test.txt", "r");
+
+	if (COMFile) {
+
+		fseek(COMFile, 0, 0);									//Go to begin of file
+		fread(&COMValue, sizeof(char), 3, COMFile);				//Get first 3 chars
+		fseek(COMFile, 3, 0);									//Go to after 3 chars
+		fread(&COMValue[3], sizeof(int), 1, COMFile);			//Get first int
+		COMValue[4] = '\0';										//Add a null temrinator b/s string
+
+		printf("Your COM Port is %s", COMValue);
+		Sleep(500);
+		fclose(COMFile);										//Close file
+	}
+	mbstowcs(COMPORT_Tx, COMValue, 5);
 
 	// Set up both sides of the comm link
 	initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
@@ -185,11 +238,14 @@ void Audio(short iBigBuf[], int recordingtime) {
 	printf("COM Port: %ws has been initialized", COMPORT_Tx);
 	Sleep(1000);
 	system("cls");
+
+
+	outputToPort(&hComTx, iBigBuf, lBigBufSize);
 	printf("\n _________________________");
 	printf("\n|                         |");
 	printf("\n|   Sending to user...... |");
 	printf("\n|_________________________|");
-	outputToPort(&hComTx, iBigBuf, recordingtime);
+	
 	Sleep(1000);
 										// Close the handle to Tx port 
 				// Display message from port
