@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assn1.h" />
+    <ClInclude Include="C:\Users\Nickolas\Desktop\New folder\testrle\testrle\rle.h" />
     <ClInclude Include="Queues.h" />
     <ClInclude Include="RS232Comm.h" />
     <ClInclude Include="Send.h" />
@@ -27,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assn1.cpp" />
+    <ClCompile Include="C:\Users\Nickolas\Desktop\New folder\testrle\testrle\rle.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Queues.cpp" />
     <ClCompile Include="RS232Comm.cpp" />

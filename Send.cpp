@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "RS232Comm.h"
+#include "rle.h"
 
 void testsend(){
 
@@ -39,12 +40,21 @@ void testsend(){
 	mbstowcs(COMPORT_Tx, COMValue, 5);							//Convert char array to wchar_t array
 
 	initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
-	printf("COM Port: %ws has been initialized", COMPORT_Tx);
+	printf("COM Port: %ws has been initialized\n", COMPORT_Tx);
 	Sleep(1000);
 
 	// Transmit side 
-	char msgOut[] = "Hi there person";							// Sent message	
-	outputToPort(&hComTx, msgOut, strlen(msgOut)+1);			// Send string to port - include space for '\0' termination
+	unsigned char msgOut[] = "Hi there person";							// Sent message	
+	unsigned char compmsgOut[197];
+	int size;
+
+	printf("Message before compression: %s\n\n",msgOut);
+	size = RLE_Compress(msgOut, compmsgOut, sizeof(msgOut));
+	printf("Message after compression: %s\n\n",compmsgOut);
+	printf("The size of your message is: %d",size);
+	
+
+	outputToPort(&hComTx, compmsgOut, size);			// Send string to port - include space for '\0' termination
 	Sleep(500);													// Allow time for signal propagation on cable 
 	
 	// Tear down both sides of the comm link
