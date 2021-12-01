@@ -17,6 +17,7 @@ Details: Messaging system
 #include "Send.h"
 #include "Assn1.h"
 #include "RS232Comm.h"
+#include "Header.h"
 
 
 int main(int argc, char* argv[])
@@ -48,6 +49,12 @@ int main(int argc, char* argv[])
 	srand(time(0));
 	int randomVal;
 	randomVal = rand() % 1140;
+	char selection;													// Tx or Rx (can run two instances of this program - double click the exe file)
+	Header txHeader;												// Header transmitted 
+	Header rxHeader;												// Header received
+	void* rxPayload = NULL;											// Received payload (buffer) - void so it can be any data type
+	DWORD bytesRead;												// Number of bytes received
+
 	while (mainmenu != 'q')
 	{
 		system("cls");
@@ -91,40 +98,12 @@ int main(int argc, char* argv[])
 
 						if (sendmenu == 'r')
 						{
-
-							// initialize playback and recording
-							InitializePlayback();
-							InitializeRecording();
-
-							// start recording
-							RecordBuffer(iBigBuf, lBigBufSize);
-							CloseRecording();
-
-
-							// playback recording 
-							printf("\n _____________________________");
-							printf("\n|                             |");
-							printf("\n|Playing recording from buffer|");
-							printf("\n|_____________________________|");
-							PlayBuffer(iBigBuf, lBigBufSize);
-							ClosePlayback();
-
 							while (save != 'n')
 							{
-								system("cls");
-								printf("\n __________________________________________________");
-								printf("\n|                                                  |");
-								printf("\n|Would you like to Send your audio recording? (y/n)|");
-								printf("\n|__________________________________________________|\n");
-								scanf_s("%c", &save, 1);
-								while ((c = getchar()) != '\n' && c != EOF) {} // Flush other input
-								Sleep(1000);
-
-								if ((save == 'y') || (save == 'Y')) {
 									
 									Audio();
 									break;
-								}
+								
 
 			
 

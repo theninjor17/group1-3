@@ -30,7 +30,10 @@
     <ClInclude Include="Assn1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Nickolas\Desktop\New folder\testrle\testrle\rle.h">
+    <ClInclude Include="rle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,7 +56,7 @@
     <ClCompile Include="sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Nickolas\Desktop\New folder\testrle\testrle\rle.c">
+    <ClCompile Include="rle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

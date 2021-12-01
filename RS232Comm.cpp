@@ -9,15 +9,38 @@
 #include <string.h>
 #include "RS232Comm.h"
 #include "sound.h"
+#include "Header.h"
 #define EX_FATAL 1
 
-// Initializes the port and sets the communication parameters
+void transmit(Header* txHeader, void* txPayload, HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
+	initPort(hCom, COMPORT, nComRate, nComBits, timeout);				// Initialize the Tx port
+	outputToPort(hCom, txHeader, sizeof(Header));						// Send Header
+	outputToPort(hCom, txPayload, (*txHeader).payloadSize);				// Send payload
+	Sleep(500);															// Allow time for signal propagation on cable 
+	purgePort(hCom);													// Purge the Tx port
+	CloseHandle(*hCom);													// Close the handle to Tx port 
+}
+
+
+DWORD receive(Header* rxHeader, void** rxPayload, HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
+	// Note: Pointer to rxPayload buffer (pointer to a pointer) is passed to this function since this function malloc's the amount of memory required - need to free it in main()
+	DWORD bytesRead;
+	initPort(hCom, COMPORT, nComRate, nComBits, timeout);				// Initialize the Rx port
+	inputFromPort(hCom, rxHeader, sizeof(Header));						// Read in Header first (which is a standard number of bytes) to get size of payload 
+	*rxPayload = (void*)malloc((*rxHeader).payloadSize);				// Allocate buffer memory to receive payload. Will have to recast these bytess later to a specific data type / struct / etc - rembmer top free it in main()
+	bytesRead = inputFromPort(hCom, *rxPayload, (*rxHeader).payloadSize);// Receive payload 
+	purgePort(hCom);													// Purge the Rx port
+	CloseHandle(*hCom);													// Close the handle to Rx port 
+	return bytesRead;													// Number of bytes read
+}
+
 void initPort(HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
 	createPortFile(hCom, COMPORT);						// Initializes hCom to point to PORT#
 	purgePort(hCom);									// Purges the COM port
 	SetComParms(hCom, nComRate, nComBits, timeout);		// Uses the DCB structure to set up the COM port
 	purgePort(hCom);
 }
+
 
 // Purge any outstanding requests on the serial port (initialize)
 void purgePort(HANDLE* hCom) {
@@ -26,14 +49,10 @@ void purgePort(HANDLE* hCom) {
 
 // Output/Input messages to/from ports 
 void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
-	int i=0;
-
+	int i = 0;
 	DWORD NumberofBytesTransmitted;
-
-	LPDWORD lpErrors=0;
-	
-	LPCOMSTAT lpStat=0; 
-
+	LPDWORD lpErrors = 0;
+	LPCOMSTAT lpStat = 0;
 
 	i = WriteFile(
 		*hCom,										// Write handle pointing to COM port
@@ -41,9 +60,7 @@ void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
 		szBuf,										// Size of buffer
 		&NumberofBytesTransmitted,					// Written number of bytes
 		NULL
-	); 
-	printf("break for life");
-	Sleep(1000);
+	);
 	// Handle the timeout error
 	if (i == 0) {
 		printf("\nWrite Error: 0x%x\n", GetLastError());
@@ -51,9 +68,6 @@ void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
 	}
 	else
 		printf("\nSuccessful transmission, there were %ld bytes transmitted\n", NumberofBytesTransmitted);
-	
-	printf("break for life");
-	Sleep(1000);
 }
 
 void outputToPort2(HANDLE* hCom, LPCVOID buf, DWORD message) {
@@ -197,7 +211,7 @@ void TxRx(void) {
 }
 
 
- void Audio() {
+ void Audio() {    //send audio
 	 char COMValue[5];											//Var to get COM value from file
 	 FILE* COMFile;
 	 // BUFFERS
@@ -212,8 +226,26 @@ void TxRx(void) {
 	HANDLE hComTx;										// Pointer to the selected COM port (Transmitter)
 	int nComRate = 9600;								// Baud (Bit) rate in bits/second 
 	int nComBits = 8;									// Number of bits per frame
+	int audiomenu{};
+	char c;			// used to flush extra input
 								// A commtimeout struct variable
 
+								// initialize playback and recording
+	InitializePlayback();
+	InitializeRecording();
+
+	// start recording
+	RecordBuffer(iBigBuf, lBigBufSize);
+	CloseRecording();
+
+
+	// playback recording 
+	printf("\n _____________________________");
+	printf("\n|                             |");
+	printf("\n|Playing recording from buffer|");
+	printf("\n|_____________________________|");
+	PlayBuffer(iBigBuf, lBigBufSize);
+	ClosePlayback();
 
 	COMFile = fopen("test.txt", "r");
 
@@ -230,33 +262,48 @@ void TxRx(void) {
 		fclose(COMFile);										//Close file
 	}
 	mbstowcs(COMPORT_Tx, COMValue, 5);
-
-	// Set up both sides of the comm link
-	initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
-	Sleep(500);
-
-	printf("COM Port: %ws has been initialized", COMPORT_Tx);
-	Sleep(1000);
-	system("cls");
+	while (audiomenu != 'n')
+	{
 
 
-	outputToPort(&hComTx, iBigBuf, lBigBufSize);
-	printf("\n _________________________");
-	printf("\n|                         |");
-	printf("\n|   Sending to user...... |");
-	printf("\n|_________________________|");
-	
-	Sleep(1000);
-										// Close the handle to Tx port 
-				// Display message from port
+		system("cls");
+		printf("\n __________________________________________________");
+		printf("\n|                                                  |");
+		printf("\n|Would you like to Send your audio recording? (y/n)|");
+		printf("\n|__________________________________________________|\n");
+		scanf_s("%c", &audiomenu, 1);
+		while ((c = getchar()) != '\n' && c != EOF) {} // Flush other input
+		Sleep(1000);
+		if (audiomenu == 'y') {
+
+
+			// Set up both sides of the comm link
+			initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
+			Sleep(500);
+
+			printf("COM Port: %ws has been initialized", COMPORT_Tx);
+			Sleep(1000);
+			system("cls");
+
+
+			outputToPort(&hComTx, iBigBuf, lBigBufSize);
+			printf("\n _________________________");
+			printf("\n|                         |");
+			printf("\n|   Sending to user...... |");
+			printf("\n|_________________________|");
+
+			Sleep(1000);
+			// Close the handle to Tx port 
+	// Display message from port
 
 	// Tear down both sides of the comm link
-	purgePort(&hComTx);											// Purge the Tx port
-	CloseHandle(hComTx);										// Close the handle to Tx port 
+			purgePort(&hComTx);											// Purge the Tx port
+			CloseHandle(hComTx);										// Close the handle to Tx port 
 
-	Sleep(1000);
-
-
+			Sleep(1000); 
+				break;
+		}
+	}
 
 
 
