@@ -276,7 +276,6 @@ void TxRx(void) {
 		Sleep(1000);
 		if (audiomenu == 'y') {
 
-
 			// Set up both sides of the comm link
 			initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
 			Sleep(500);
@@ -293,16 +292,15 @@ void TxRx(void) {
 			printf("\n|_________________________|");
 
 			Sleep(1000);
-			// Close the handle to Tx port 
-	// Display message from port
+		
 
-	// Tear down both sides of the comm link
 			purgePort(&hComTx);											// Purge the Tx port
 			CloseHandle(hComTx);										// Close the handle to Tx port 
 
 			Sleep(1000); 
 				break;
 		}
+	
 	}
 
 
