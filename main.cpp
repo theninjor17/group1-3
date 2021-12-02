@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
 						{
 							while (save != 'n')
 							{
+								
+	
 									
 									Audio();
 									break;
@@ -410,11 +412,21 @@ int main(int argc, char* argv[])
 							printf("\n|_________________________________|\n|                                 |");
 							printf("\n| Contact list .................s |\n|                                 |");
 							printf("\n| Reply to last messages .......r |\n|                                 |");
+							printf("\n| Send a FortuneCookie .........p |\n|                                 |");
 							printf("\n| Back .........................b |\n|                                 |");
 							printf("\n|_________________________________|\n\n");
 							if (scanf("%c", &ts)) {};
+
+							if (ts == 'p') {
+								//TRANSMIT FORTUNE COOKIE
+								//system("cls");
+								printf("\nCall transmit");
+								transmittype();
+								printf("\nTransmit call success");
+							}
 						}
 					}
+
 					else if (amenu == 'r')
 					{
 						while (tr != 'b')

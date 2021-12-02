@@ -14,11 +14,14 @@
 
 void transmit(Header* txHeader, void* txPayload, HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
 	initPort(hCom, COMPORT, nComRate, nComBits, timeout);				// Initialize the Tx port
+	printf("COM Port: %ws has been initialized\n", COMPORT);
+	Sleep(1000);
 	outputToPort(hCom, txHeader, sizeof(Header));						// Send Header
 	outputToPort(hCom, txPayload, (*txHeader).payloadSize);				// Send payload
 	Sleep(500);															// Allow time for signal propagation on cable 
 	purgePort(hCom);													// Purge the Tx port
-	CloseHandle(*hCom);													// Close the handle to Tx port 
+	CloseHandle(*hCom);													// Close the handle to Tx port
+	system("pause");
 }
 
 
@@ -276,7 +279,6 @@ void TxRx(void) {
 		Sleep(1000);
 		if (audiomenu == 'y') {
 
-
 			// Set up both sides of the comm link
 			initPort(&hComTx, COMPORT_Tx, nComRate, nComBits, timeout);	// Initialize the Tx port
 			Sleep(500);
@@ -293,16 +295,15 @@ void TxRx(void) {
 			printf("\n|_________________________|");
 
 			Sleep(1000);
-			// Close the handle to Tx port 
-	// Display message from port
+		
 
-	// Tear down both sides of the comm link
 			purgePort(&hComTx);											// Purge the Tx port
 			CloseHandle(hComTx);										// Close the handle to Tx port 
 
 			Sleep(1000); 
 				break;
 		}
+	
 	}
 
 

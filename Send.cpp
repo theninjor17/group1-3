@@ -8,6 +8,23 @@
 #include <string.h>
 #include "RS232Comm.h"
 #include "rle.h"
+#include "Header.h"
+#include "sound.h"
+#include "Assn1.h"
+
+const int BUFSIZE = 140;							// Buffer size
+wchar_t COMPORT_Rx[] = L"COM7";						// COM port used for Rx 
+wchar_t COMPORT_Tx[] = L"COM6";						// COM port used for Tx 
+HANDLE hComRx;										// Pointer to the selected COM port (Receiver)
+HANDLE hComTx;										// Pointer to the selected COM port (Transmitter)
+int nComRate = 9600;								// Baud (Bit) rate in bits/second 
+int nComBits = 8;									// Number of bits per frame
+COMMTIMEOUTS timeout;
+char selection;													// Tx or Rx (can run two instances of this program - double click the exe file)
+Header txHeader;												// Header transmitted 
+Header rxHeader;												// Header received
+void* rxPayload = NULL;											// Received payload (buffer) - void so it can be any data type
+DWORD bytesRead;												// Number of bytes received
 
 void testsend(){
 
@@ -64,3 +81,62 @@ void testsend(){
 	system("pause");
 }
 
+void transmittype() {
+
+
+		//Variables
+		static char COMValue[5];											//Var to get COM value from file
+		static FILE* COMFile;												//FP to get COM Value from
+		static const int BUFSIZE = 140;								// Buffer size
+		wchar_t COMPORT_Tx[5];										// COM port used for Rx
+		static HANDLE hComTx;										// Pointer to the selected COM port (Receiver)
+		int nComRate = 9600;										// Baud (Bit) rate in bits/second 
+		int nComBits = 8;											// Number of bits per frame
+		static COMMTIMEOUTS timeout;									// A commtimeout struct variable
+		
+		Header txHeader;												// Header transmitted 
+		int randVal;
+		randVal = rand() % 1140;
+		char userBuf[141];
+
+
+		COMFile = fopen("test.txt", "r");							//Open file to hold value
+
+		printf("\nGoing to check COMports");
+		if (COMFile) {
+
+			fseek(COMFile, 0, 0);									//Go to begin of file
+			fread(&COMValue, sizeof(char), 3, COMFile);				//Get first 3 chars
+			fseek(COMFile, 3, 0);									//Go to after 3 chars
+			fread(&COMValue[3], sizeof(int), 1, COMFile);			//Get first int
+			COMValue[4] = '\0';										//Add a null temrinator b/s string
+
+			printf("Your COM Port is %s", COMValue);
+			Sleep(500);
+			fclose(COMFile);										//Close file
+		}
+
+		mbstowcs(COMPORT_Tx, COMValue, 5);							//Convert char array to wchar_t array
+
+		// Payload (sample type is text)
+		char txPayload[] = "Hello from this side.";
+		//GetMessageFromFile(userBuf, randVal); 	// Payload is a text message in this example but could be any data	
+		//strcpy(txPayload, userBuf);
+		// Header (sample data type is text but this should work with audio and images as well)
+		txHeader.sid = 1;
+		txHeader.rid = 2;
+		txHeader.payloadSize = strlen(txPayload) + 1;				// Flexible payload size - Send size of payload inside header (payload can be anything) and enough memory will be malloc'd in the receive function
+		txHeader.compression = 0;									// None
+		txHeader.encryption = 0;									// None
+		txHeader.payLoadType = 0;									// Text = 0, Audio = 1
+
+		printf("\nMessage to be sent is:%s", txPayload);
+		Sleep(2000);
+
+		transmit(&txHeader, txPayload, &hComTx, COMPORT_Tx, nComRate, nComBits, timeout);  // Transmit header and payload
+	
+
+
+
+
+}
