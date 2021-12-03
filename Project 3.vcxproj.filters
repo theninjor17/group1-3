@@ -59,5 +59,8 @@
     <ClCompile Include="rle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="phonebook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

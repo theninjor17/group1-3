@@ -42,9 +42,11 @@ int main(int argc, char* argv[])
 	char ts{}; //text send menu
 	char ar{}; //audio recive menu
 	char COMValue[5];
+	char SIDValue[1];
 	int recordingtime = RECORD_TIME * SAMPLES_SEC * 2;
 	FILE* f;
 	FILE* COMFile;
+	FILE* SIDFile;
 	char userBuffer[140];
 	srand(time(0));
 	int randomVal;
@@ -234,10 +236,26 @@ int main(int argc, char* argv[])
 				printf("\n| recording time................s |\n|                                 |");
 				printf("\n| Clear Messages................c |\n|                                 |");
 				printf("\n| Diagnostic....................d |\n|                                 |");
+				printf("\n| Sid ..........................e |\n|                                 |");
 				printf("\n| Back .........................b |\n|                                 |");
 				printf("\n|_________________________________|\n\n");
 				if (scanf("%c", &opmenu)) {};
 
+				if (opmenu == 'e')
+				{
+					SIDFile = fopen("sid.txt", "w");
+					if (SIDFile == NULL) {
+						printf("Can't find file\n");
+					}
+					else {
+						printf("What would you like your sid to be?");
+						scanf("%s", &SIDValue);
+						printf("Your SID is now %s", SIDValue);
+						fwrite(SIDValue, 1, strlen(SIDValue), SIDFile);
+						Sleep(500);
+						fclose(SIDFile);
+					}
+				}
 				if (opmenu == 'r')
 				{
 
@@ -415,6 +433,11 @@ int main(int argc, char* argv[])
 							printf("\n| Back .........................b |\n|                                 |");
 							printf("\n|_________________________________|\n\n");
 							if (scanf("%c", &ts)) {};
+
+							if (ts == 'r')
+							{
+								send();
+							}
 						}
 					}
 					else if (amenu == 'r')

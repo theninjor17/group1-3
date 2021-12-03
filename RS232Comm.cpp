@@ -12,14 +12,7 @@
 #include "Header.h"
 #define EX_FATAL 1
 
-void transmit(Header* txHeader, void* txPayload, HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
-	initPort(hCom, COMPORT, nComRate, nComBits, timeout);				// Initialize the Tx port
-	outputToPort(hCom, txHeader, sizeof(Header));						// Send Header
-	outputToPort(hCom, txPayload, (*txHeader).payloadSize);				// Send payload
-	Sleep(500);															// Allow time for signal propagation on cable 
-	purgePort(hCom);													// Purge the Tx port
-	CloseHandle(*hCom);													// Close the handle to Tx port 
-}
+
 
 
 DWORD receive(Header* rxHeader, void** rxPayload, HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
@@ -36,8 +29,14 @@ DWORD receive(Header* rxHeader, void** rxPayload, HANDLE* hCom, wchar_t* COMPORT
 
 void initPort(HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
 	createPortFile(hCom, COMPORT);						// Initializes hCom to point to PORT#
+	printf("test1");
+	Sleep(1000);
 	purgePort(hCom);									// Purges the COM port
+	printf("test2");
+	Sleep(1000);
 	SetComParms(hCom, nComRate, nComBits, timeout);		// Uses the DCB structure to set up the COM port
+	printf("test3");
+	Sleep(1000);
 	purgePort(hCom);
 }
 
@@ -53,7 +52,8 @@ void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
 	DWORD NumberofBytesTransmitted;
 	LPDWORD lpErrors = 0;
 	LPCOMSTAT lpStat = 0;
-
+	printf("test");
+	Sleep(1000);
 	i = WriteFile(
 		*hCom,										// Write handle pointing to COM port
 		buf,										// Buffer size
@@ -61,6 +61,8 @@ void outputToPort(HANDLE* hCom, LPCVOID buf, DWORD szBuf) {
 		&NumberofBytesTransmitted,					// Written number of bytes
 		NULL
 	);
+	printf("testafter write");
+	Sleep(1000);
 	// Handle the timeout error
 	if (i == 0) {
 		printf("\nWrite Error: 0x%x\n", GetLastError());
@@ -159,13 +161,21 @@ void createPortFile(HANDLE* hCom, wchar_t* COMPORT) {
 
 	// Set communication timeouts (SEE COMMTIMEOUTS structure in MSDN) - want a fairly long timeout
 	memset((void *)&timeout, 0, sizeof(timeout));
-	timeout.ReadIntervalTimeout = 10000;				// Maximum time allowed to elapse before arival of next byte in milliseconds. If the interval between the arrival of any two bytes exceeds this amount, the ReadFile operation is completed and buffered data is returned
-	timeout.ReadTotalTimeoutMultiplier = 5;			// The multiplier used to calculate the total time-out period for read operations in milliseconds. For each read operation this value is multiplied by the requested number of bytes to be read
+	timeout.ReadIntervalTimeout = 500;				// Maximum time allowed to elapse before arival of next byte in milliseconds. If the interval between the arrival of any two bytes exceeds this amount, the ReadFile operation is completed and buffered data is returned
+	timeout.ReadTotalTimeoutMultiplier = 1;			// The multiplier used to calculate the total time-out period for read operations in milliseconds. For each read operation this value is multiplied by the requested number of bytes to be read
 	timeout.ReadTotalTimeoutConstant = 5000;		// A constant added to the calculation of the total time-out period. This constant is added to the resulting product of the ReadTotalTimeoutMultiplier and the number of bytes (above).
 	SetCommTimeouts(*hCom, &timeout);
 	return(1);
 }
-
+ 
+ void transmit(Header* txHeader, void* txPayload, HANDLE* hCom, wchar_t* COMPORT, int nComRate, int nComBits, COMMTIMEOUTS timeout) {
+	 initPort(hCom, COMPORT, nComRate, nComBits, timeout);				// Initialize the Tx port
+	 outputToPort(hCom, txHeader, sizeof(Header));						// Send Header
+	 outputToPort(hCom, txPayload, (*txHeader).payloadSize);				// Send payload
+	 Sleep(500);															// Allow time for signal propagation on cable 
+	 purgePort(hCom);													// Purge the Tx port
+	 CloseHandle(*hCom);													// Close the handle to Tx port 
+ }
 
 // MG added TxRx()
 
