@@ -19,7 +19,7 @@ int GetMessageFromFile (char szBuff[], int randomVal){
     char FileName[] = "FortuneCookies.txt";
     int filePosition=0, numOfQuotes=0, ftellVar=0, i=0, j=0, k=0;
     int quoteStartLoc[1141] = { 0 };
-    char tempBuf[140];
+    char tempBuf[141];
     char firstChar=tempBuf[0];
     randomVal;
 
@@ -79,6 +79,8 @@ int GetMessageFromFile (char szBuff[], int randomVal){
             printf("%s", szBuff);
         }
     }
+
+    szBuff[141] = '\0';
     Sleep(2000);
 
     //Close file

@@ -15,4 +15,5 @@ struct header {
 	char payLoadType;			// 0: Text, 1: Audio, 2: Image etc.
 	char encryption;			// 0: None, 1: XOR,	  2: Vigenere	3: Both
 	char compression;			// 0: None, 1: RLE,	  2: Huffman,	3: Both
+	void* payload = NULL;		// Payload for reciever side to store in a queue
 };
